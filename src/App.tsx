@@ -1,26 +1,57 @@
 import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { Routes, Route } from 'react-router-dom';
 
-function App() {
+import { AuthProvider } from './contexts/AuthContext';
+import { CartProvider } from './contexts/CartContext';
+import { SessionProvider } from './contexts/SessionContext';
+import { SelfCheckoutProvider } from './contexts/SelfCheckoutContext';
+
+import ProtectedRoute from './components/shared/ProtectedRoute';
+import AdminRoute from './components/shared/AdminRoute';
+
+import LoginPage from './pages/LoginPage';
+import ScanPage from './pages/ScanPage';
+import CheckoutPage from './pages/CheckoutPage';
+import StartSessionPage from './pages/StartSessionPage';
+import EndSessionPage from './pages/EndSessionPage';
+
+import SelfScanPage from './pages/SelfScanPage';
+import SelfCheckoutPage from './pages/SelfCheckoutPage';
+
+import AdminPage from './pages/AdminPage';
+import AdminUsersPage from './pages/AdminUsersPage';
+import AdminProductsActivePage from './pages/AdminProductsActivePage';
+import AdminProductsInactivePage from './pages/AdminProductsInactivePage';
+
+const App = () => {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <SelfCheckoutProvider>
+      <AuthProvider>
+        <SessionProvider>
+          <CartProvider>
+            <Routes>
+              {/* Modul clasic */}
+              <Route path="/" element={<LoginPage />} />
+              <Route path="/scan" element={<ProtectedRoute><ScanPage /></ProtectedRoute>} />
+              <Route path="/checkout" element={<ProtectedRoute><CheckoutPage /></ProtectedRoute>} />
+              <Route path="/start-session" element={<ProtectedRoute><StartSessionPage /></ProtectedRoute>} />
+              <Route path="/end-session" element={<ProtectedRoute><EndSessionPage /></ProtectedRoute>} />
+
+              {/* Admin */}
+              <Route path="/admin" element={<AdminRoute><AdminPage /></AdminRoute>} />
+              <Route path="/admin/users" element={<AdminRoute><AdminUsersPage /></AdminRoute>} />
+              <Route path="/admin/products/active" element={<AdminRoute><AdminProductsActivePage /></AdminRoute>} />
+              <Route path="/admin/products/inactive" element={<AdminRoute><AdminProductsInactivePage /></AdminRoute>} />
+
+              {/* Modul SelfCheckout */}
+              <Route path="/self/scan" element={<ProtectedRoute><SelfScanPage /></ProtectedRoute>} />
+              <Route path="/self/checkout" element={<ProtectedRoute><SelfCheckoutPage /></ProtectedRoute>} />
+            </Routes>
+          </CartProvider>
+        </SessionProvider>
+      </AuthProvider>
+    </SelfCheckoutProvider>
   );
-}
+};
 
 export default App;

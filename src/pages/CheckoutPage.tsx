@@ -1,0 +1,220 @@
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import api from '../services/api';
+import PosLayout from '../components/layout/PosLayout';
+import Numpad from '../components/shared/Numpad';
+import { useCart } from '../contexts/CartContext';
+import SupervisorLoginModal from '../components/shared/SupervisorLoginModal';
+import CheckoutPanel from '../components/forms/CheckoutPanel';
+
+type Payment = {
+  method: 'Cash' | 'Card';
+  amount: number;
+};
+
+const CheckoutPage = () => {
+  const { cart, clearCart } = useCart();
+  const [paymentInput, setPaymentInput] = useState('');
+  const [payments, setPayments] = useState<Payment[]>([]);
+  const [isFinished, setIsFinished] = useState(false);
+  const [isLocked, setIsLocked] = useState(false);
+  const [showSupervisorModal, setShowSupervisorModal] = useState(false);
+
+  const navigate = useNavigate();
+
+  const totalToPay = cart.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
+  const totalPaid = payments.reduce((sum, p) => sum + p.amount, 0);
+  const remaining = totalToPay - totalPaid;
+  const change = totalPaid > totalToPay ? totalPaid - totalToPay : 0;
+
+  useEffect(() => {
+    if (totalPaid >= totalToPay && !isFinished && payments.length > 0) {
+      finalizeTransaction();
+    }
+  }, [totalPaid]);
+
+  const handleKeyClick = (key: string) => {
+    if (isLocked) return;
+    if (key === '<-') {
+      setPaymentInput(prev => prev.slice(0, -1));
+    } else {
+      setPaymentInput(prev => prev + key);
+    }
+  };
+
+  const handleAddPayment = (method: 'Cash' | 'Card') => {
+    if (isFinished || isLocked) return;
+
+    const hasInput = paymentInput.trim() !== '';
+
+    if (method === 'Card') {
+      const cardAmount = hasInput ? parseFloat(paymentInput) : remaining;
+
+      if (cardAmount > remaining) {
+        alert(`Suma introdusă depășește totalul de plată (${remaining.toFixed(2)} lei).`);
+        return;
+      }
+
+      if (cardAmount <= 0 || isNaN(cardAmount)) {
+        alert('Suma introdusă nu este validă.');
+        return;
+      }
+
+      setPayments(prev => [...prev, { method: 'Card', amount: cardAmount }]);
+      setPaymentInput('');
+      return;
+    }
+
+    const amount = parseFloat(paymentInput);
+    if (isNaN(amount) || amount <= 0) {
+      alert('Suma introdusă nu este validă.');
+      return;
+    }
+
+    setPayments(prev => [...prev, { method, amount }]);
+    setPaymentInput('');
+  };
+
+  const finalizeTransaction = async () => {
+    const user = JSON.parse(localStorage.getItem('user') || 'null');
+    if (!user?.employeeCode) {
+      alert('Utilizatorul nu este autentificat.');
+      return;
+    }
+
+    try {
+      const response = await api.get('/salesession/active');
+      const session = response.data.find((s: any) => s.cashierCode === user.employeeCode);
+      if (!session) {
+        alert('Nu există sesiune activă.');
+        return;
+      }
+
+      const items = cart.map(item => ({
+        productBarcode: item.product.barcode,
+        quantity: item.quantity,
+        unitPrice: item.product.price
+      }));
+
+      const cashPaid = payments.filter(p => p.method === 'Cash').reduce((sum, p) => sum + p.amount, 0);
+      const cardPaid = payments.filter(p => p.method === 'Card').reduce((sum, p) => sum + p.amount, 0);
+
+      const result = await api.post('/saletransaction', {
+        saleSessionId: session.id,
+        totalAmount: totalToPay,
+        paymentMethod: cardPaid === 0 ? 'Cash' : cashPaid === 0 ? 'Card' : 'Mixed',
+        cashAmountReceived: cashPaid || 0,
+        cardAmountReceived: cardPaid || 0,
+        changeGiven: change > 0 ? change : null,
+        items,
+        status: 'Succeeded'
+      });
+
+      const receiptUrl = result.data?.receiptUrl;
+      if (receiptUrl) {
+        window.open(`http://localhost:5032${receiptUrl}`, '_blank');
+      }
+
+      setIsFinished(true);
+      setIsLocked(true);
+
+      setTimeout(() => {
+        clearCart();
+        navigate('/scan');
+      }, 5000);
+    } catch (error) {
+      console.error(error);
+      alert('Eroare la trimiterea tranzacției.');
+    }
+  };
+
+  const handleCancelTransaction = async () => {
+    const user = JSON.parse(localStorage.getItem('user') || 'null');
+    if (!user?.employeeCode) {
+      alert('Utilizatorul nu este autentificat.');
+      return;
+    }
+
+    try {
+      const response = await api.get('/salesession/active');
+      const session = response.data.find((s: any) => s.cashierCode === user.employeeCode);
+      if (!session) {
+        alert('Nu există sesiune activă.');
+        return;
+      }
+
+      const items = cart.map(item => ({
+        productBarcode: item.product.barcode,
+        quantity: item.quantity,
+        unitPrice: item.product.price
+      }));
+
+      await api.post('/saletransaction', {
+        saleSessionId: session.id,
+        totalAmount: 0,
+        paymentMethod: 'Canceled',
+        cashAmountReceived: 0,
+        cardAmountReceived: 0,
+        changeGiven: 0,
+        items,
+        status: 'Canceled'
+      });
+
+      setIsFinished(true);
+      setIsLocked(true);
+
+      setTimeout(() => {
+        clearCart();
+        navigate('/scan');
+      }, 3000);
+    } catch (error) {
+      console.error(error);
+      alert('Eroare la anularea bonului.');
+    }
+  };
+
+  return (
+    <>
+      <PosLayout
+        topLeft={
+          <CheckoutPanel
+            cart={cart}
+            remaining={remaining}
+            change={change}
+            paymentInput={paymentInput}
+            isLocked={isLocked}
+            onKeyClick={handleKeyClick}
+            onAddCash={() => handleAddPayment('Cash')}
+            onAddCard={() => handleAddPayment('Card')}
+          />
+        }
+
+        bottomLeft={
+          <div>
+            {!isLocked && <Numpad onKeyClick={handleKeyClick} />}
+            <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+              <button style={{ flex: 1 }} onClick={() => handleAddPayment('Cash')} disabled={isLocked}>Cash</button>
+              <button style={{ flex: 1 }} onClick={() => handleAddPayment('Card')} disabled={isLocked}>Card</button>
+            </div>
+          </div>
+        }
+
+        right={
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <button onClick={() => navigate('/scan')} disabled={isLocked}>Înapoi</button>
+            <button onClick={() => setShowSupervisorModal(true)} disabled={isLocked}>Anulează bon</button>
+          </div>
+        }
+      />
+
+      {showSupervisorModal && (
+        <SupervisorLoginModal
+          onClose={() => setShowSupervisorModal(false)}
+          onSuccess={handleCancelTransaction}
+        />
+      )}
+    </>
+  );
+};
+
+export default CheckoutPage;
