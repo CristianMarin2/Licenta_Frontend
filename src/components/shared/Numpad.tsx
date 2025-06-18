@@ -1,4 +1,4 @@
-import '../../styles/Numpad.css';
+import './Numpad.css';
 
 const keys = [
   '1', '2', '3', '<-',

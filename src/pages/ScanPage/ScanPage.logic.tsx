@@ -1,24 +1,21 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api from '../services/api';
-import PosLayout from '../components/layout/PosLayout';
-import Numpad from '../components/shared/Numpad';
-import SupervisorLoginModal from '../components/shared/SupervisorLoginModal';
-import { useCart } from '../contexts/CartContext';
-import ScanPanel from '../components/forms/ScanPanel';
-import ImportQrModal from '../components/shared/ImportQRModal';
+import api from '../../services/api';
+import { useCart } from '../../contexts/CartContext';
 
-const ScanPage = () => {
+const useScanPageLogic = () => {
   const [barcode, setBarcode] = useState('');
   const [quantity, setQuantity] = useState(1);
-  const [sessionActive, setSessionActive] = useState(false);
   const [selectedBarcode, setSelectedBarcode] = useState<string | null>(null);
   const [canceledLines, setCanceledLines] = useState(0);
+  const [sessionActive, setSessionActive] = useState(false);
   const [showSupervisorModal, setShowSupervisorModal] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
 
   const { cart, addProduct, updateQuantity, removeProduct } = useCart();
   const navigate = useNavigate();
+
+  const total = cart.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
 
   useEffect(() => {
     checkSession();
@@ -116,74 +113,24 @@ const ScanPage = () => {
     }
   };
 
-  const total = cart.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
-
-  return (
-    <>
-      <PosLayout
-        topLeft={
-          <ScanPanel
-            cart={cart}
-            barcode={barcode}
-            quantity={quantity}
-            selectedBarcode={selectedBarcode}
-            total={total}
-            onSelectProduct={setSelectedBarcode}
-          />
-        }
-
-        bottomLeft={<Numpad onKeyClick={handleKeyClick} />}
-
-        right={
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            <button onClick={handleSetQuantity} disabled={!selectedBarcode}>Cantitate nouă</button>
-            <button onClick={handleRemoveLine} disabled={!selectedBarcode}>Anulează linia</button>
-            <button onClick={() => {
-              if (cart.length === 0) {
-                alert('Coșul este gol.');
-                return;
-              }
-              setCanceledLines(0);
-              navigate('/checkout');
-            }}>Total</button>
-            <button onClick={() => setShowImportModal(true)}>📷 Importă coș din QR</button>
-            <button onClick={() => {
-              if (cart.length > 0) {
-                alert('Nu poți face depunere cât timp există produse în coș.');
-                return;
-              }
-              if (sessionActive) {
-                navigate('/end-session');
-              } else {
-                navigate('/start-session');
-              }
-            }}>
-              {sessionActive ? 'Depunere' : 'Alimentare'}
-            </button>
-            <button onClick={() => {
-              if (cart.length > 0) {
-                alert('Nu poți ieși cât timp există produse în coș.');
-                return;
-              }
-              localStorage.removeItem('user');
-              window.location.reload();
-            }}>Logout</button>
-          </div>
-        }
-      />
-
-      {showSupervisorModal && (
-        <SupervisorLoginModal
-          onClose={() => setShowSupervisorModal(false)}
-          onSuccess={confirmRemoveLine}
-        />
-      )}
-
-      {showImportModal && (
-        <ImportQrModal onClose={() => setShowImportModal(false)} />
-      )}
-    </>
-  );
+  return {
+    barcode,
+    quantity,
+    selectedBarcode,
+    sessionActive,
+    showSupervisorModal,
+    showImportModal,
+    cart,
+    total,
+    handleKeyClick,
+    handleSetQuantity,
+    handleRemoveLine,
+    confirmRemoveLine,
+    setShowImportModal,
+    setShowSupervisorModal,
+    setSelectedBarcode,
+    navigate,
+  };
 };
 
-export default ScanPage;
+export default useScanPageLogic;

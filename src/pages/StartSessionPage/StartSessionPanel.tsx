@@ -1,3 +1,5 @@
+import React from 'react';
+
 interface StartSessionPanelProps {
   amount: string;
   message: string;

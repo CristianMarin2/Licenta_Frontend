@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import api from '../../services/api';
-import '../../styles/Modal.css';
+import './Modal.css';
 
 interface CashierLoginModalProps {
   onClose: () => void;

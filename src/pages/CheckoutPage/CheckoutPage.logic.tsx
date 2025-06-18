@@ -1,18 +1,14 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api from '../services/api';
-import PosLayout from '../components/layout/PosLayout';
-import Numpad from '../components/shared/Numpad';
-import { useCart } from '../contexts/CartContext';
-import SupervisorLoginModal from '../components/shared/SupervisorLoginModal';
-import CheckoutPanel from '../components/forms/CheckoutPanel';
+import api from '../../services/api';
+import { useCart } from '../../contexts/CartContext';
 
 type Payment = {
   method: 'Cash' | 'Card';
   amount: number;
 };
 
-const CheckoutPage = () => {
+const useCheckoutPageLogic = () => {
   const { cart, clearCart } = useCart();
   const [paymentInput, setPaymentInput] = useState('');
   const [payments, setPayments] = useState<Payment[]>([]);
@@ -46,28 +42,15 @@ const CheckoutPage = () => {
     if (isFinished || isLocked) return;
 
     const hasInput = paymentInput.trim() !== '';
+    const amount = hasInput ? parseFloat(paymentInput) : (method === 'Card' ? remaining : NaN);
 
-    if (method === 'Card') {
-      const cardAmount = hasInput ? parseFloat(paymentInput) : remaining;
-
-      if (cardAmount > remaining) {
-        alert(`Suma introdusă depășește totalul de plată (${remaining.toFixed(2)} lei).`);
-        return;
-      }
-
-      if (cardAmount <= 0 || isNaN(cardAmount)) {
-        alert('Suma introdusă nu este validă.');
-        return;
-      }
-
-      setPayments(prev => [...prev, { method: 'Card', amount: cardAmount }]);
-      setPaymentInput('');
+    if (isNaN(amount) || amount <= 0) {
+      alert('Suma introdusă nu este validă.');
       return;
     }
 
-    const amount = parseFloat(paymentInput);
-    if (isNaN(amount) || amount <= 0) {
-      alert('Suma introdusă nu este validă.');
+    if (amount > remaining) {
+      alert(`Suma introdusă depășește totalul de plată (${remaining.toFixed(2)} lei).`);
       return;
     }
 
@@ -173,48 +156,19 @@ const CheckoutPage = () => {
     }
   };
 
-  return (
-    <>
-      <PosLayout
-        topLeft={
-          <CheckoutPanel
-            cart={cart}
-            remaining={remaining}
-            change={change}
-            paymentInput={paymentInput}
-            isLocked={isLocked}
-            onKeyClick={handleKeyClick}
-            onAddCash={() => handleAddPayment('Cash')}
-            onAddCard={() => handleAddPayment('Card')}
-          />
-        }
-
-        bottomLeft={
-          <div>
-            {!isLocked && <Numpad onKeyClick={handleKeyClick} />}
-            <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
-              <button style={{ flex: 1 }} onClick={() => handleAddPayment('Cash')} disabled={isLocked}>Cash</button>
-              <button style={{ flex: 1 }} onClick={() => handleAddPayment('Card')} disabled={isLocked}>Card</button>
-            </div>
-          </div>
-        }
-
-        right={
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            <button onClick={() => navigate('/scan')} disabled={isLocked}>Înapoi</button>
-            <button onClick={() => setShowSupervisorModal(true)} disabled={isLocked}>Anulează bon</button>
-          </div>
-        }
-      />
-
-      {showSupervisorModal && (
-        <SupervisorLoginModal
-          onClose={() => setShowSupervisorModal(false)}
-          onSuccess={handleCancelTransaction}
-        />
-      )}
-    </>
-  );
+  return {
+    cart,
+    paymentInput,
+    remaining,
+    change,
+    isLocked,
+    showSupervisorModal,
+    handleKeyClick,
+    handleAddPayment,
+    handleCancelTransaction,
+    setShowSupervisorModal,
+    navigate
+  };
 };
 
-export default CheckoutPage;
+export default useCheckoutPageLogic;

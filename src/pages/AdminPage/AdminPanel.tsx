@@ -1,19 +1,20 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
+import React from 'react';
 
-const AdminPage: React.FC = () => {
-  const navigate = useNavigate();
-  const { logout } = useAuth();
-  const [showDropdown, setShowDropdown] = useState(false);
+interface AdminPanelProps {
+  logout: () => void;
+  handleNavigate: (path: string) => void;
+  showDropdown: boolean;
+  toggleDropdown: () => void;
+}
 
-  const handleNavigate = (path: string) => {
-    navigate(path);
-  };
-
+const AdminPanel: React.FC<AdminPanelProps> = ({
+  logout,
+  handleNavigate,
+  showDropdown,
+  toggleDropdown,
+}) => {
   return (
     <div style={{ padding: '2rem', position: 'relative' }}>
-      {/* Buton Logout */}
       <button
         onClick={logout}
         style={{
@@ -28,12 +29,11 @@ const AdminPage: React.FC = () => {
           cursor: 'pointer'
         }}
       >
-        🚪 Logout
+         Logout
       </button>
 
       <h1>Panou administrare</h1>
 
-      {/* Buton Casieri */}
       <button
         onClick={() => handleNavigate('/admin/users')}
         style={{
@@ -43,20 +43,19 @@ const AdminPage: React.FC = () => {
           cursor: 'pointer'
         }}
       >
-        👨‍💼 Administrare casieri
+         Administrare casieri
       </button>
 
-      {/* Buton Produse cu meniu derulant */}
       <div style={{ position: 'relative', display: 'inline-block', margin: '1rem' }}>
         <button
-          onClick={() => setShowDropdown(prev => !prev)}
+          onClick={toggleDropdown}
           style={{
             fontSize: '1.2rem',
             padding: '1rem 2rem',
             cursor: 'pointer'
           }}
         >
-          📦 Administrare produse ▾
+           Administrare produse ▾
         </button>
 
         {showDropdown && (
@@ -76,13 +75,13 @@ const AdminPage: React.FC = () => {
               onClick={() => handleNavigate('/admin/products/active')}
               style={{ padding: '0.5rem 1rem', width: '100%', textAlign: 'left', cursor: 'pointer' }}
             >
-              ✅ Produse active
+               Produse active
             </button>
             <button
               onClick={() => handleNavigate('/admin/products/inactive')}
               style={{ padding: '0.5rem 1rem', width: '100%', textAlign: 'left', cursor: 'pointer' }}
             >
-              🚫 Produse inactive
+               Produse inactive
             </button>
           </div>
         )}
@@ -91,4 +90,4 @@ const AdminPage: React.FC = () => {
   );
 };
 
-export default AdminPage;
+export default AdminPanel;

@@ -1,13 +1,10 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api from '../services/api';
-import PosLayout from '../components/layout/PosLayout';
-import { useCart } from '../contexts/CartContext';
-import { useSelfCheckout } from '../contexts/SelfCheckoutContext';
-import CashierLoginModal from '../components/shared/CashierLoginModal';
-import SelfCheckoutPanel from '../components/forms/SelfCheckoutPanel';
+import { useCart } from '../../contexts/CartContext';
+import { useSelfCheckout } from '../../contexts/SelfCheckoutContext';
+import api from '../../services/api';
 
-const SelfCheckoutPage = () => {
+const useSelfCheckoutLogic = () => {
   const { cart, clearCart } = useCart();
   const [isFinished, setIsFinished] = useState(false);
   const [isLocked, setIsLocked] = useState(false);
@@ -69,57 +66,43 @@ const SelfCheckoutPage = () => {
     }
   };
 
-  return (
-    <>
-      <PosLayout
-        topLeft={
-          <SelfCheckoutPanel
-            cart={cart}
-            total={totalToPay}
-            isFinished={isFinished}
-          />
-        }
-        bottomLeft={
-          <div></div>
-        }
-        right={
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            {!isFinished && (
-              <button onClick={handleCardPayment} disabled={isLocked}>
-                Plătește cu cardul
-              </button>
-            )}
-            {isCashierOverride ? (
-              <>
-                <button onClick={() => navigate('/self/scan')}>Înapoi</button>
-                <button
-                  onClick={() => {
-                    clearCart();
-                    navigate('/self/scan');
-                  }}
-                >
-                  Anulează bon
-                </button>
-                <button onClick={() => setCashierOverride(false)}>Revino la client</button>
-              </>
-            ) : (
-              <button onClick={() => setShowCashierModal(true)}>Cheamă casier</button>
-            )}
-          </div>
-        }
-      />
+  const handleCancel = () => {
+    clearCart();
+    navigate('/self/scan');
+  };
 
-      {showCashierModal && (
-        <CashierLoginModal
-          onClose={() => setShowCashierModal(false)}
-          onSuccess={() => {
-            setCashierOverride(true);
-            setShowCashierModal(false);
-          }}
-        />
-      )}
-    </>
-  );
+  const handleBack = () => {
+    navigate('/self/scan');
+  };
+
+  const openCashierLogin = () => {
+    setShowCashierModal(true);
+  };
+
+  const closeCashierOverride = () => {
+    setCashierOverride(false);
+    setShowCashierModal(false);
+  };
+
+  const handleCashierLoginSuccess = () => {
+    setCashierOverride(true);
+    setShowCashierModal(false);
+  };
+
+  return {
+    cart,
+    totalToPay,
+    isFinished,
+    isLocked,
+    showCashierModal,
+    isCashierOverride,
+    handleCardPayment,
+    handleCancel,
+    handleBack,
+    openCashierLogin,
+    closeCashierOverride,
+    handleCashierLoginSuccess
+  };
 };
 
-export default SelfCheckoutPage;
+export default useSelfCheckoutLogic;

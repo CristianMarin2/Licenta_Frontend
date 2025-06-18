@@ -1,5 +1,5 @@
 import React from 'react';
-import '../../styles/PosLayout.css';
+import './PosLayout.css';
 
 interface PosLayoutProps {
   topLeft: React.ReactNode;

@@ -1,7 +1,7 @@
 import React from 'react';
-import '../../styles/LoginForm.css';
+import './LoginPage.css';
 
-interface LoginFormProps {
+interface LoginPanelProps {
   employeeCode: string;
   password: string;
   message: string;
@@ -9,7 +9,7 @@ interface LoginFormProps {
   onSubmit: (e: React.FormEvent) => void;
 }
 
-const LoginForm: React.FC<LoginFormProps> = ({
+const LoginPanel: React.FC<LoginPanelProps> = ({
   employeeCode,
   password,
   message,
@@ -41,4 +41,4 @@ const LoginForm: React.FC<LoginFormProps> = ({
   );
 };
 
-export default LoginForm;
+export default LoginPanel;

@@ -1,6 +1,6 @@
 import React from 'react';
 import { CartItem } from '../../contexts/CartContext';
-import '../../styles/ScanPanel.css';
+import './ScanPage.css';
 
 interface ScanPanelProps {
   cart: CartItem[];
