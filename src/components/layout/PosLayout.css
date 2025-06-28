@@ -1,0 +1,81 @@
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+  font-family: sans-serif;
+  background-color: #f4f4f4;
+}
+
+.pos-layout {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  padding: 0.5rem;
+  gap: 0.5rem;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.pos-left {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 70%;
+  overflow: hidden;
+}
+
+.pos-right {
+  width: 30%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+}
+
+.pos-card {
+  background: #ffffff;
+  padding: 1rem;
+  border-radius: 12px;
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+button {
+  padding: 1rem;
+  font-size: 1.2rem;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  background-color: #007bff;
+  color: white;
+  transition: background-color 0.2s ease-in-out;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+  .pos-layout {
+    flex-direction: column;
+  }
+
+  .pos-left,
+  .pos-right {
+    width: 100%;
+  }
+
+  .pos-left {
+    flex-direction: column;
+  }
+}

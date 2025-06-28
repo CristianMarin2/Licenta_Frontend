@@ -1,0 +1,73 @@
+.login-form {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 100%;
+  padding: 1rem;
+}
+
+.login-form h3 {
+  font-size: 2rem;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.login-form label {
+  font-size: 1.2rem;
+  margin-bottom: 0.25rem;
+}
+
+.login-form input {
+  font-size: 1.5rem;
+  padding: 0.8rem;
+  border: 2px solid #ccc;
+  border-radius: 8px;
+  text-align: center;
+  width: 100%;
+  margin-bottom: 1rem;
+}
+
+.login-form button[type="submit"] {
+  width: 100%;
+  background-color: #007bff;
+  color: white;
+  font-size: 1.4rem;
+  padding: 1rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-top: 1rem;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.login-form button[type="submit"]:hover {
+  background-color: #0056b3;
+}
+
+.login-form .error-message {
+  margin-top: 1.5rem;
+  color: red;
+  font-size: 1.1rem;
+  text-align: center;
+}
+
+.corner-buttons {
+  position: absolute;
+  bottom: 1rem;
+  right: 1rem;
+}
+
+.corner-buttons button {
+  background-color: #007bff;
+  color: white;
+  font-size: 1rem;
+  padding: 0.6rem 1.2rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.corner-buttons button:hover {
+  background-color: #0056b3;
+}

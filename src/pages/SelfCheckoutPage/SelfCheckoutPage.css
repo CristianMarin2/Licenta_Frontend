@@ -1,0 +1,40 @@
+.self-checkout-page {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.top-panel {
+  flex: 2;
+  padding: 2rem;
+  background-color: #f8f9fa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bottom-panel {
+  flex: 1;
+  padding: 2rem;
+  background-color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.checkout-panel h2 {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+
+.button-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.button-panel button {
+  padding: 1.2rem;
+  font-size: 1.2rem;
+  min-width: 250px;
+}

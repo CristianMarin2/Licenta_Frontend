@@ -1,0 +1,53 @@
+.supervisor-panel {
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.2);
+  width: 300px;
+  gap: 1rem;
+}
+
+.supervisor-panel h3 {
+  font-size: 1.4rem;
+  text-align: center;
+}
+
+.supervisor-panel form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.supervisor-panel input {
+  font-size: 1.2rem;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  text-align: center;
+}
+
+.supervisor-panel button {
+  padding: 0.7rem;
+  font-size: 1.1rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.supervisor-panel button[type="submit"] {
+  background-color: #007bff;
+  color: white;
+}
+
+.supervisor-panel button[type="button"] {
+  background-color: #ccc;
+  color: black;
+}
+
+.supervisor-panel .error {
+  color: red;
+  text-align: center;
+  font-size: 1rem;
+}
